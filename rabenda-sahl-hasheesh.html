@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rabenda — Asian Fusion &amp; Sushi, Sahl Hasheesh</title>
+<meta name="description" content="Asian fusion and sushi on the beach at Old Town, Sahl Hasheesh. Open daily 2:30pm until 11:30pm. Reserve by WhatsApp.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Italiana&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+/* =====================================================================
+   SEIF — PUT THE PHOTOS HERE. This is the only place you need to edit.
+   Drop image files next to this file and put the filenames below.
+   Any slot left blank falls back to a deep-water panel, so nothing breaks.
+   ===================================================================== */
+:root{
+  --img-hero:   url("");   /* wide shot: the terrace at dusk, or the counter  */
+  --img-sushi:  url("");   /* the sushi plate — the hero of the whole page    */
+  --img-oven:   url("");   /* the Japanese oven / smoked eel                  */
+  --img-room:   url("");   /* the terrace, tables facing the water            */
+  --img-g1:     url("");   /* gallery — anything beautiful                    */
+  --img-g2:     url("");
+  --img-g3:     url("");
+  --img-g4:     url("");
+  --img-g5:     url("");
+}
+/* ===================================================================== */
+
+:root{
+  --aizome:#16243F; --aizome-deep:#0E1729; --shoji:#EDE8DE; --coral:#E8735A;
+  --shoji-dim:rgba(237,232,222,.62); --shoji-faint:rgba(237,232,222,.30);
+  --rule:rgba(237,232,222,.14);
+  --display:"Italiana",serif; --body:"Jost",system-ui,sans-serif;
+  --gut:clamp(1.5rem,5vw,5rem); --stack:clamp(5rem,11vw,9rem);
+  --water:linear-gradient(150deg,#1B2E4E 0%,#0E1729 60%,#22383A 100%);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{background:var(--aizome);color:var(--shoji);font-family:var(--body);font-weight:300;line-height:1.65;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--coral);outline-offset:3px}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:var(--gut)}
+.eyebrow{font-size:.7rem;letter-spacing:.28em;text-transform:uppercase;color:var(--shoji-faint);font-weight:400}
+
+/* photo frames — look intentional even while empty */
+.ph{background:var(--water);background-size:cover;background-position:center;position:relative;overflow:hidden}
+.ph::after{content:"";position:absolute;inset:0;box-shadow:inset 0 0 0 1px var(--rule)}
+
+.status{display:inline-flex;align-items:center;gap:.6rem;border:1px solid var(--rule);border-radius:999px;padding:.45rem 1rem .45rem .8rem;font-size:.78rem;letter-spacing:.06em;background:rgba(14,23,41,.55);backdrop-filter:blur(8px)}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--coral);flex:none}
+.status[data-open="true"] .dot{animation:pulse 2.4s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(.8)}}
+.status b{font-weight:500}
+.status span{color:var(--shoji-dim)}
+
+/* hero */
+.hero{min-height:100svh;display:flex;flex-direction:column;justify-content:space-between;padding-block:2rem var(--gut);position:relative;overflow:hidden}
+.hero-bg{position:absolute;inset:0;background-image:var(--img-hero);background-size:cover;background-position:center;transform:scale(1.06);animation:drift 24s ease-in-out infinite alternate}
+.hero-bg::before{content:"";position:absolute;inset:0;background:var(--water);opacity:var(--wash,1)}
+.hero-bg::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(14,23,41,.7) 0%,rgba(22,36,63,.45) 45%,rgba(14,23,41,.9) 100%)}
+@keyframes drift{from{transform:scale(1.06) translateY(0)}to{transform:scale(1.12) translateY(-14px)}}
+.hero > *{position:relative;z-index:1}
+.hero::after{content:"";position:absolute;left:0;right:0;bottom:0;height:1px;z-index:2;background:linear-gradient(90deg,transparent,rgba(232,115,90,.55),transparent)}
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap}
+.mark{font-family:var(--display);font-size:1.1rem;letter-spacing:.4em;text-transform:uppercase}
+.hero-mid{padding-block:clamp(3rem,10vh,7rem)}
+.hero h1{font-family:var(--display);font-weight:400;font-size:clamp(3.6rem,15vw,11rem);line-height:.86;letter-spacing:.02em;text-transform:uppercase}
+.hero h1 em{display:block;font-style:normal;color:var(--coral);font-size:clamp(.9rem,2.4vw,1.5rem);letter-spacing:.42em;margin-top:clamp(1rem,2.5vw,1.8rem);text-indent:.42em}
+.hero-lede{margin-top:clamp(1.6rem,4vw,2.4rem);max-width:34ch;font-size:clamp(1rem,1.5vw,1.15rem);color:var(--shoji-dim)}
+.hero-foot{display:flex;justify-content:space-between;align-items:flex-end;gap:2rem;flex-wrap:wrap}
+
+/* orchestrated load */
+.lift{opacity:0;transform:translateY(22px);animation:lift .9s cubic-bezier(.2,.7,.3,1) forwards}
+.lift.d1{animation-delay:.1s}.lift.d2{animation-delay:.3s}.lift.d3{animation-delay:.5s}.lift.d4{animation-delay:.7s}
+@keyframes lift{to{opacity:1;transform:none}}
+
+.cta{display:inline-block;text-decoration:none;background:var(--coral);color:var(--aizome-deep);font-weight:500;font-size:.85rem;letter-spacing:.16em;text-transform:uppercase;padding:1.05rem 2.2rem;border-radius:2px;transition:transform .25s ease,filter .25s ease}
+.cta:hover{transform:translateY(-2px);filter:brightness(1.08)}
+
+.band{padding-block:var(--stack);border-top:1px solid var(--rule)}
+.band-head{margin-bottom:clamp(2.5rem,6vw,4rem);max-width:56ch}
+.band-head h2{font-family:var(--display);font-weight:400;font-size:clamp(2rem,5vw,3.4rem);line-height:1.08;margin-top:1rem}
+.band-head p{margin-top:1.2rem;color:var(--shoji-dim);max-width:48ch}
+
+/* counter — image cards */
+.counter{display:grid;gap:clamp(1rem,2vw,1.6rem)}
+@media (min-width:820px){.counter{grid-template-columns:repeat(3,1fr)}}
+.cell .shot{aspect-ratio:4/5;border-radius:2px}
+.cell:nth-child(1) .shot{background-image:var(--img-sushi)}
+.cell:nth-child(2) .shot{background-image:var(--img-oven)}
+.cell:nth-child(3) .shot{background-image:var(--img-room)}
+.cell h3{font-family:var(--display);font-weight:400;font-size:1.6rem;margin:1.2rem 0 .6rem}
+.cell p{color:var(--shoji-dim);font-size:.95rem}
+.cell .num{font-size:.7rem;letter-spacing:.2em;color:var(--coral)}
+
+/* gallery strip */
+.strip{display:flex;gap:1rem;overflow-x:auto;padding-bottom:1rem;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch}
+.strip::-webkit-scrollbar{height:2px}
+.strip::-webkit-scrollbar-thumb{background:var(--rule)}
+.strip .ph{flex:0 0 clamp(200px,32vw,300px);aspect-ratio:1;scroll-snap-align:start;border-radius:2px}
+.strip .ph:nth-child(1){background-image:var(--img-g1)}
+.strip .ph:nth-child(2){background-image:var(--img-g2)}
+.strip .ph:nth-child(3){background-image:var(--img-g3)}
+.strip .ph:nth-child(4){background-image:var(--img-g4)}
+.strip .ph:nth-child(5){background-image:var(--img-g5)}
+
+/* menu */
+.dish{display:grid;gap:.3rem 2rem;padding-block:clamp(1.5rem,3vw,2rem);border-bottom:1px solid var(--rule)}
+@media (min-width:760px){.dish{grid-template-columns:minmax(0,20ch) minmax(0,1fr);align-items:baseline}}
+.dish:first-of-type{border-top:1px solid var(--rule)}
+.dish h3{font-family:var(--display);font-weight:400;font-size:clamp(1.4rem,2.6vw,1.9rem)}
+.dish p{color:var(--shoji-dim);font-size:.95rem}
+.menu-note{margin-top:2.2rem;font-size:.85rem;color:var(--shoji-faint)}
+
+.quotes{display:grid;gap:clamp(2rem,4vw,3rem)}
+@media (min-width:820px){.quotes{grid-template-columns:repeat(3,1fr)}}
+.quote p{font-family:var(--display);font-size:clamp(1.3rem,2.4vw,1.7rem);line-height:1.35}
+.quote footer{margin-top:1rem;font-size:.72rem;letter-spacing:.18em;text-transform:uppercase;color:var(--shoji-faint)}
+
+.terrace{display:grid;gap:clamp(2rem,5vw,4rem)}
+@media (min-width:880px){.terrace{grid-template-columns:1fr 1fr;align-items:center}}
+.facts{list-style:none;border-top:1px solid var(--rule)}
+.facts li{display:flex;justify-content:space-between;gap:2rem;padding-block:1.1rem;border-bottom:1px solid var(--rule);font-size:.95rem}
+.facts .k{color:var(--shoji-faint);font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;padding-top:.25rem}
+.facts .v{text-align:right}
+.facts a{color:var(--coral);text-decoration:none}
+.facts a:hover{text-decoration:underline}
+
+.reserve{background:var(--aizome-deep)}
+.form{display:grid;gap:1.2rem;max-width:640px;margin-top:2.5rem}
+@media (min-width:640px){.row2{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem}}
+label{display:block;font-size:.7rem;letter-spacing:.18em;text-transform:uppercase;color:var(--shoji-faint);margin-bottom:.5rem}
+input,select,textarea{width:100%;background:transparent;color:var(--shoji);border:1px solid var(--rule);border-radius:2px;padding:.85rem .9rem;font-family:var(--body);font-size:1rem;font-weight:300}
+input:focus,select:focus,textarea:focus{border-color:var(--coral);outline:none}
+select option{background:var(--aizome-deep);color:var(--shoji)}
+textarea{resize:vertical;min-height:80px}
+.form .cta{border:0;cursor:pointer;font-family:var(--body);justify-self:start;margin-top:.5rem}
+.form-note{font-size:.8rem;color:var(--shoji-faint);margin-top:.4rem}
+
+footer.site{border-top:1px solid var(--rule);padding-block:3rem;font-size:.85rem;color:var(--shoji-dim)}
+.foot-grid{display:flex;justify-content:space-between;gap:2rem;flex-wrap:wrap;align-items:flex-end}
+.foot-grid a{color:var(--coral);text-decoration:none}
+.credit{font-size:.72rem;color:var(--shoji-faint);margin-top:2.5rem}
+
+.rise{opacity:0;transform:translateY(18px);transition:opacity .7s ease,transform .7s ease}
+.rise.in{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){
+  .rise,.lift{opacity:1;transform:none;transition:none;animation:none}
+  .hero-bg{animation:none}
+  .status[data-open="true"] .dot{animation:none}
+  .cta:hover{transform:none}
+}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="hero-bg" id="heroBg"></div>
+
+  <div class="wrap topbar lift d1">
+    <div class="mark">Rabenda</div>
+    <div class="status" id="status" data-open="false">
+      <span class="dot"></span><b id="status-label">Checking…</b><span id="status-detail"></span>
+    </div>
+  </div>
+
+  <div class="wrap hero-mid">
+    <h1 class="lift d2">Rabenda<em>Asian fusion &amp; sushi</em></h1>
+    <p class="hero-lede lift d3">On the sand at Old Town, Sahl Hasheesh. Sushi cut to order, the oven lit at dusk, and the Red Sea two steps away.</p>
+  </div>
+
+  <div class="wrap hero-foot lift d4">
+    <a class="cta" href="#reserve">Reserve a table</a>
+    <p class="eyebrow">Old Town · Sahl Hasheesh · Red Sea</p>
+  </div>
+</header>
+
+<main>
+  <section class="band">
+    <div class="wrap">
+      <div class="band-head rise"><p class="eyebrow">The counter</p><h2>Three things we are known for</h2></div>
+      <div class="counter rise">
+        <article class="cell"><div class="ph shot"></div><p class="num">01</p><h3>The sushi</h3>
+          <p>Cut to order at the counter — nigiri, sashimi and rolls, built from the day's fish rather than a fixed list. The thing people come back for.</p></article>
+        <article class="cell"><div class="ph shot"></div><p class="num">02</p><h3>The oven</h3>
+          <p>Beyond the raw menu, dishes come out of the Japanese oven — smoked eel among them. The half of the kitchen most guests don't expect.</p></article>
+        <article class="cell"><div class="ph shot"></div><p class="num">03</p><h3>The terrace</h3>
+          <p>Tables facing open water on the Old Town beachfront. Service from half past two until half past eleven, every day.</p></article>
+      </div>
+    </div>
+  </section>
+
+  <section class="band">
+    <div class="wrap">
+      <div class="band-head rise"><p class="eyebrow">The room</p><h2>An evening here</h2></div>
+    </div>
+    <div class="wrap rise">
+      <div class="strip">
+        <div class="ph"></div><div class="ph"></div><div class="ph"></div><div class="ph"></div><div class="ph"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="band">
+    <div class="wrap">
+      <div class="band-head rise"><p class="eyebrow">Selected dishes</p><h2>From the kitchen</h2>
+        <p>A few of the plates guests write home about. The full card is at the table.</p></div>
+      <div class="rise">
+        <article class="dish"><h3>Nigiri &amp; sashimi</h3><p>Cut to order. Salmon, tuna, and whatever came in that morning — presented plainly, because it doesn't need help.</p></article>
+        <article class="dish"><h3>Smoked eel</h3><p>Out of the Japanese oven. Rich, sweet, and the dish our regulars order before they've opened the menu.</p></article>
+        <article class="dish"><h3>Seafood in coconut</h3><p>Mixed fish and seafood in a light coconut sauce. The Asian half of Asian fusion, and the plate we'd point a first-timer at.</p></article>
+        <article class="dish"><h3>Tom kha kai</h3><p>Coconut, galangal, chicken. Ordered as a starter, remembered as a main event.</p></article>
+        <article class="dish"><h3>Mövenpick ice cream</h3><p>We don't make it and we won't pretend we do. It's very good, and it ends the meal properly.</p></article>
+        <p class="menu-note">Wine and sake by the glass and bottle. Prices at the table — ask the floor for the evening's list.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="band">
+    <div class="wrap">
+      <div class="band-head rise"><p class="eyebrow">4.9 across 163 Google reviews</p><h2>What guests say</h2></div>
+      <div class="quotes rise">
+        <blockquote class="quote"><p>“Every single one was absolutely delicious.”</p><footer>Google review</footer></blockquote>
+        <blockquote class="quote"><p>“Fresh, flavorful, and beautifully presented.”</p><footer>Google review</footer></blockquote>
+        <blockquote class="quote"><p>“Absolutely lovely restaurant by the beach side.”</p><footer>Google review</footer></blockquote>
+      </div>
+    </div>
+  </section>
+
+  <section class="band">
+    <div class="wrap terrace">
+      <div class="band-head rise" style="margin-bottom:0"><p class="eyebrow">Finding us</p><h2>Old Town, on the water</h2>
+        <p>Walk the Old Town promenade toward the sea. We're the terrace with the counter behind it.</p></div>
+      <ul class="facts rise">
+        <li><span class="k">Hours</span><span class="v">Daily · 2:30pm — 11:30pm</span></li>
+        <li><span class="k">Address</span><span class="v">Old Town, Sahl Hasheesh<br>Hurghada, Red Sea 84521</span></li>
+        <li><span class="k">Phone</span><span class="v"><a href="tel:+201029140505">+20 10 29140505</a></span></li>
+        <li><span class="k">Instagram</span><span class="v"><a href="https://www.instagram.com/rabenda_asian/" target="_blank" rel="noopener">@rabenda_asian</a></span></li>
+        <li><span class="k">Map</span><span class="v"><a href="https://www.google.com/maps/search/?api=1&amp;query=27.0483956,33.8943279" target="_blank" rel="noopener">Open in Google Maps</a></span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="band reserve" id="reserve">
+    <div class="wrap">
+      <div class="band-head rise"><p class="eyebrow">Reservations</p><h2>Book a table</h2>
+        <p>Fill this in and it opens WhatsApp with your booking written out. Send it, and we'll confirm.</p></div>
+      <div class="form rise">
+        <div class="row2">
+          <div><label for="name">Name</label><input id="name" type="text" placeholder="Your name" autocomplete="name"></div>
+          <div><label for="people">Guests</label><select id="people">
+            <option>1</option><option selected>2</option><option>3</option><option>4</option>
+            <option>5</option><option>6</option><option>7</option><option>8</option><option>More than 8</option>
+          </select></div>
+        </div>
+        <div class="row2">
+          <div><label for="date">Date</label><input id="date" type="date"></div>
+          <div><label for="time">Time</label><select id="time"></select></div>
+        </div>
+        <div><label for="hotel">Hotel or resort <span style="text-transform:none;letter-spacing:0">(optional)</span></label>
+          <input id="hotel" type="text" placeholder="Where you're staying"></div>
+        <div><label for="notes">Anything we should know <span style="text-transform:none;letter-spacing:0">(optional)</span></label>
+          <textarea id="notes" placeholder="Allergies, birthday, terrace table…"></textarea></div>
+        <button class="cta" id="send" type="button">Send booking via WhatsApp</button>
+        <p class="form-note" id="formNote">Opens WhatsApp — nothing is sent until you press send there.</p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="site">
+  <div class="wrap">
+    <div class="foot-grid">
+      <div><div class="mark" style="margin-bottom:.8rem">Rabenda</div>
+        <p>Asian fusion &amp; sushi<br>Old Town, Sahl Hasheesh</p></div>
+      <div><p>Daily 2:30pm — 11:30pm<br>
+        <a href="tel:+201029140505">+20 10 29140505</a><br>
+        <a href="https://www.instagram.com/rabenda_asian/" target="_blank" rel="noopener">@rabenda_asian</a></p></div>
+    </div>
+    <p class="credit">Concept design — not an official site. Built as a proposal for the owners of Rabenda.</p>
+  </div>
+</footer>
+
+<script>
+(function(){
+  "use strict";
+  var PHONE="201029140505", OPEN_MIN=14*60+30, CLOSE_MIN=23*60+30;
+
+  /* if no hero photo is set, drop the wash so the water panel reads cleanly */
+  var hb=document.getElementById("heroBg");
+  var heroImg=getComputedStyle(document.documentElement).getPropertyValue("--img-hero").trim();
+  if(heroImg && heroImg!=='url("")' && heroImg!=="url()") hb.style.setProperty("--wash","0");
+
+  function cairoNow(){
+    var p=new Intl.DateTimeFormat("en-GB",{timeZone:"Africa/Cairo",hour12:false,
+      year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit"}).formatToParts(new Date());
+    var o={}; p.forEach(function(x){o[x.type]=x.value;});
+    return {y:+o.year,m:+o.month,d:+o.day,mins:(+o.hour)*60+(+o.minute)};
+  }
+  function human(m){var h=Math.floor(m/60),r=m%60;if(h<=0)return r+" min";if(r===0)return h+"h";return h+"h "+r+"m";}
+  function paint(){
+    var el=document.getElementById("status");if(!el)return;
+    var t=cairoNow(), open=t.mins>=OPEN_MIN&&t.mins<CLOSE_MIN;
+    el.setAttribute("data-open",open?"true":"false");
+    document.getElementById("status-label").textContent=open?"Open now":"Closed";
+    document.getElementById("status-detail").textContent=open
+      ? "· kitchen closes in "+human(CLOSE_MIN-t.mins)
+      : "· opens in "+human(t.mins<OPEN_MIN?OPEN_MIN-t.mins:(24*60-t.mins)+OPEN_MIN);
+  }
+  paint(); setInterval(paint,30000);
+
+  var ts=document.getElementById("time");
+  if(ts){for(var m=OPEN_MIN;m<=CLOSE_MIN-30;m+=30){
+    var h=Math.floor(m/60),mm=m%60,ap=h>=12?"pm":"am",h12=h>12?h-12:h;
+    var txt=h12+":"+(mm===0?"00":mm)+ap,o=document.createElement("option");
+    o.value=txt;o.textContent=txt;if(m===20*60)o.selected=true;ts.appendChild(o);}}
+
+  var de=document.getElementById("date");
+  if(de){var t=cairoNow(),pad=function(n){return(n<10?"0":"")+n;};
+    var today=t.y+"-"+pad(t.m)+"-"+pad(t.d);de.value=today;de.min=today;}
+
+  var btn=document.getElementById("send");
+  if(btn){btn.addEventListener("click",function(){
+    var name=(document.getElementById("name").value||"").trim(), note=document.getElementById("formNote");
+    if(!name){note.textContent="Add your name first, then we can send the booking.";
+      note.style.color="var(--coral)";document.getElementById("name").focus();return;}
+    note.textContent="Opens WhatsApp — nothing is sent until you press send there.";note.style.color="";
+    var hotel=(document.getElementById("hotel").value||"").trim(), notes=(document.getElementById("notes").value||"").trim();
+    var L=["Table booking — Rabenda","","Name: "+name,"Guests: "+document.getElementById("people").value,
+      "Date: "+document.getElementById("date").value,"Time: "+document.getElementById("time").value];
+    if(hotel)L.push("Staying at: "+hotel); if(notes)L.push("Notes: "+notes);
+    window.open("https://wa.me/"+PHONE+"?text="+encodeURIComponent(L.join("\n")),"_blank");
+  });}
+
+  var reduce=window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var r=document.querySelectorAll(".rise");
+  if(reduce||!("IntersectionObserver" in window)){r.forEach(function(e){e.classList.add("in");});}
+  else{var io=new IntersectionObserver(function(es){es.forEach(function(e){
+    if(e.isIntersecting){e.target.classList.add("in");io.unobserve(e.target);}});},
+    {threshold:.12,rootMargin:"0px 0px -8% 0px"});
+    r.forEach(function(e){io.observe(e);});}
+})();
+</script>
+</body>
+</html>
