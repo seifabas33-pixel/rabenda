@@ -13,6 +13,7 @@ is the only one worth believing.
 USAGE
 -----
     pip install pandas numpy yfinance
+    pip install matplotlib          # only needed for --plot
 
     # single stock, default strategy
     python egx_backtest.py --ticker EGS38191C010.CA
@@ -22,6 +23,10 @@ USAGE
 
     # walk-forward validation (the honest test)
     python egx_backtest.py --ticker EGS38191C010.CA --walkforward
+
+    # save an equity-curve plot (default file: equity_curve.png)
+    python egx_backtest.py --ticker EGS38191C010.CA --compare --plot
+    python egx_backtest.py --ticker EGS38191C010.CA --walkforward --plot wf.png
 
     # use your own CSV instead of downloading
     python egx_backtest.py --csv mydata.csv
@@ -261,6 +266,74 @@ def show(name, m):
 
 
 # ---------------------------------------------------------------------------
+# Plotting
+# ---------------------------------------------------------------------------
+def plot_equity(curves, path, title, benchmark=None):
+    """
+    Render equity curves to an image file.
+
+    curves    : dict of {label: equity Series} -- one line per strategy.
+    benchmark : optional buy & hold equity Series, drawn as a dashed line.
+    path      : output image path (extension picks the format, e.g. .png/.svg).
+
+    A drawdown panel is drawn underneath. Uses a headless backend, so it
+    works over SSH / in CI with no display attached. Returns the saved path,
+    or None if matplotlib is missing or there is nothing to plot.
+    """
+    curves = {k: v for k, v in curves.items() if v is not None and len(v)}
+    if not curves:
+        print("Nothing to plot (no equity curves).", file=sys.stderr)
+        return None
+
+    try:
+        import matplotlib
+        matplotlib.use("Agg")   # no display required
+        import matplotlib.pyplot as plt
+    except ImportError:
+        print("matplotlib not installed; skipping plot. "
+              "Run: pip install matplotlib", file=sys.stderr)
+        return None
+
+    fig, (ax_eq, ax_dd) = plt.subplots(
+        2, 1, figsize=(11, 7), sharex=True,
+        gridspec_kw={"height_ratios": [3, 1]})
+
+    for label, eq in curves.items():
+        ax_eq.plot(eq.index, eq.values, linewidth=1.4, label=label)
+    if benchmark is not None and len(benchmark):
+        ax_eq.plot(benchmark.index, benchmark.values, linewidth=1.2,
+                   linestyle="--", color="0.5", label="buy & hold")
+
+    ax_eq.set_title(title)
+    ax_eq.set_ylabel("Equity")
+    ax_eq.grid(True, alpha=0.3)
+    ax_eq.legend(loc="best", fontsize=9)
+
+    # Drawdown panel: fill for a single curve, lines when comparing several.
+    if len(curves) == 1:
+        eq = next(iter(curves.values()))
+        dd = (eq / eq.cummax() - 1) * 100
+        ax_dd.fill_between(dd.index, dd.values, 0, color="crimson", alpha=0.4)
+    else:
+        for label, eq in curves.items():
+            dd = (eq / eq.cummax() - 1) * 100
+            ax_dd.plot(dd.index, dd.values, linewidth=1.0, label=label)
+    ax_dd.set_ylabel("Drawdown %")
+    ax_dd.grid(True, alpha=0.3)
+
+    fig.tight_layout()
+    try:
+        fig.savefig(path, dpi=120)
+    except Exception as e:
+        print(f"Could not save plot to {path}: {e}", file=sys.stderr)
+        plt.close(fig)
+        return None
+    plt.close(fig)
+    print(f"\nSaved equity-curve plot to {path}")
+    return path
+
+
+# ---------------------------------------------------------------------------
 # Parameter search + walk-forward
 # ---------------------------------------------------------------------------
 def param_grid(space):
@@ -287,15 +360,19 @@ def optimize(df, fn, space, min_trades=5):
     return best, best_sharpe
 
 
-def walk_forward(df, name, n_folds=4, train_frac=0.7):
+def walk_forward(df, name, n_folds=4, train_frac=0.7, capital=100_000.0):
     """
     Split history into folds. Tune on the training part of each fold, then
     trade the tuned parameters on the untouched test part. Stitch the test
     results together -- that stitched curve is your realistic expectation.
+
+    Returns (equity, benchmark) Series over the stitched out-of-sample
+    periods so the caller can plot them, or (None, None) if no fold produced
+    a tradeable result.
     """
     fn, space = STRATEGIES[name]
     fold_size = len(df) // n_folds
-    all_ret, rows = [], []
+    all_ret, all_bh, rows = [], [], []
 
     for k in range(n_folds):
         lo = k * fold_size
@@ -315,6 +392,7 @@ def walk_forward(df, name, n_folds=4, train_frac=0.7):
         eq, r, tr = backtest(test, pos)
         m = metrics(eq, r, tr, benchmark=test["Close"])
         all_ret.append(r)
+        all_bh.append(test["Close"].pct_change().fillna(0))
         rows.append((k + 1, str(params), is_sharpe, m["total_return"]))
 
     print(f"\nWALK-FORWARD: {name}")
@@ -325,17 +403,21 @@ def walk_forward(df, name, n_folds=4, train_frac=0.7):
         osr_s = f"{osr:.1%}" if osr == osr else "-"
         print(f"{k:<6}{p[:36]:<38}{isr_s:>12}{osr_s:>14}")
 
-    if all_ret:
-        stitched = pd.concat(all_ret)
-        eq = 100_000 * (1 + stitched).cumprod()
-        m = metrics(eq, stitched, pd.DataFrame())
-        print("\nCombined out-of-sample:")
-        print(f"  Total return   {m['total_return']:>9.1%}")
-        print(f"  CAGR           {m['cagr']:>9.1%}")
-        print(f"  Max drawdown   {m['max_drawdown']:>9.1%}")
-        print(f"  Sharpe         {m['sharpe']:>9.2f}")
-        print("\nIf the parameters jump around between folds, or out-of-sample")
-        print("returns are far below in-sample, the edge is not real.")
+    if not all_ret:
+        return None, None
+
+    stitched = pd.concat(all_ret)
+    eq = capital * (1 + stitched).cumprod()
+    bh_eq = capital * (1 + pd.concat(all_bh)).cumprod()
+    m = metrics(eq, stitched, pd.DataFrame())
+    print("\nCombined out-of-sample:")
+    print(f"  Total return   {m['total_return']:>9.1%}")
+    print(f"  CAGR           {m['cagr']:>9.1%}")
+    print(f"  Max drawdown   {m['max_drawdown']:>9.1%}")
+    print(f"  Sharpe         {m['sharpe']:>9.2f}")
+    print("\nIf the parameters jump around between folds, or out-of-sample")
+    print("returns are far below in-sample, the edge is not real.")
+    return eq, bh_eq
 
 
 # ---------------------------------------------------------------------------
@@ -351,6 +433,10 @@ def main():
     ap.add_argument("--compare", action="store_true", help="run every strategy")
     ap.add_argument("--walkforward", action="store_true", help="out-of-sample test")
     ap.add_argument("--capital", type=float, default=100_000)
+    ap.add_argument("--plot", nargs="?", const="equity_curve.png", default=None,
+                    metavar="PATH",
+                    help="save an equity-curve plot (default: equity_curve.png; "
+                         "needs matplotlib)")
     args = ap.parse_args()
 
     df = load_csv(args.csv) if args.csv else load_yahoo(args.ticker, args.start, args.end)
@@ -361,16 +447,30 @@ def main():
 
     if args.walkforward:
         names = list(STRATEGIES) if args.compare else [args.strategy]
+        curves, bench = {}, None
         for n in names:
-            walk_forward(df, n)
+            eq, bh = walk_forward(df, n, capital=args.capital)
+            if eq is not None:
+                curves[n] = eq
+                bench = bh   # folds are identical across strategies
+        if args.plot:
+            plot_equity(curves, args.plot,
+                        f"{label} -- walk-forward (out-of-sample)",
+                        benchmark=bench)
         return
 
     names = list(STRATEGIES) if args.compare else [args.strategy]
+    curves = {}
     for n in names:
         fn, _ = STRATEGIES[n]
         pos = fn(df)
         eq, r, tr = backtest(df, pos, args.capital)
+        curves[n] = eq
         show(n, metrics(eq, r, tr, benchmark=df["Close"]))
+
+    if args.plot:
+        bench = args.capital * df["Close"] / df["Close"].iloc[0]
+        plot_equity(curves, args.plot, f"{label} -- in-sample", benchmark=bench)
 
     print("\nThese are IN-SAMPLE numbers on default parameters.")
     print("Run with --walkforward before believing any of them.")
